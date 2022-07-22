@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ ! -d "~/.config" ]; then
+	mkdir ~/.config
+cp -f * ~/.config
+
+echo "dotfiles deployed!"
+
