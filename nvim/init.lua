@@ -24,7 +24,7 @@ require('packer').startup(function(use)
   use { 'hrsh7th/nvim-cmp', requires = { 'hrsh7th/cmp-nvim-lsp' } }               -- Autocompletion
   use 'hrsh7th/cmp-path'
   use { 'L3MON4D3/LuaSnip', requires = { 'saadparwaiz1/cmp_luasnip' } }           -- Snippet Engine and Snippet Expansion
-  use 'navarasu/onedark.nvim'                                                      -- Theme inspired by Atom
+  -- use 'navarasu/onedark.nvim'                                                      -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim'                                                 -- Fancier statusline use 'lukas-reineke/indent-blankline.nvim'                                       -- Add indentation guides even on blank lines
   use 'lukas-reineke/indent-blankline.nvim'                                       -- Add indentation guides even on blank lines
   use 'tpope/vim-sleuth'                                                          -- Detect tabstop and shiftwidth automatically
@@ -70,6 +70,9 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 })
 
 -- [[ Setting options ]]
+-- Enable copy/paste on Sway
+vim.o.clipboard = 'unnamedplus'
+
 -- Make line numbers default
 vim.wo.number = true
 
@@ -95,10 +98,10 @@ vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
 
-require('onedark').setup  {
-  transparent = true,
-}
-require('onedark').load()
+-- require('onedark').setup  {
+--   transparent = true,
+-- }
+-- require('onedark').load()
 require('alpha').setup(require('alpha.themes.dashboard').config)
 
 -- Set completeopt to have a better completion experience
@@ -132,7 +135,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme = 'onedark',
+    -- theme = 'onedark',
     component_separators = '|',
     section_separators = '',
   },
