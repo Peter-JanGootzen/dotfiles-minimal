@@ -43,20 +43,22 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder ".", "/home/vagrant/Code"
+  config.vm.synced_folder ".", "/home/vagrant/h"
   config.vm.synced_folder "~/.ssh", "/home/vagrant/.host_ssh"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false
+  
+    # Customize the amount of memory on the VM:
+    vb.memory = "8096"
+
+    vb.cpus = 4
+  end
   #
   # View the documentation for the provider you are using for more
   # information on available options.
@@ -64,14 +66,20 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
+  config.vm.provision "shell", inline: <<-SCRIPT
+    # Update
     pacman -Syu --noconfirm
-    pacman -S base-devel git clang qemu-base llvm lld --noconfirm
-    cp /home/vagrant/.host_ssh/config /home/vagrant/.ssh
-    cp -r /home/vagrant/.host_ssh/keys /home/vagrant/.ssh
-    mkdir -p /home/vagrant/.config/nvim
-    ln -s /home/vagrant/Code/dotfiles-minimal/nvim/init.lua /home/vagrant/.config/nvim/init.lua
-    chown vagrant:vagrant -R /home/vagrant/.ssh
-    chown vagrant:vagrant -R /home/vagrant/.config/nvim
-  SHELL
+    # Dev tools
+    pacman -S base-devel git cmake ninja meson clang qemu-base llvm lld --noconfirm
+    pacman -S gradle java-11-openjdk
+    # IDE
+    pacman -S neovim bear ripgrep gdb npm zip unzip --noconfirm
+  SCRIPT
+
+  config.vm.provision "shell", path: "~/vagrant_setup.sh", privileged: false
+
+  if Vagrant.has_plugin?("vagrant-timezone")
+    config.timezone.value = :host
+  end
+
 end

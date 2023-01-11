@@ -29,7 +29,7 @@ require('packer').startup(function(use)
   use { 'hrsh7th/nvim-cmp', requires = { 'hrsh7th/cmp-nvim-lsp' } }               -- Autocompletion
   use 'hrsh7th/cmp-path'
   use { 'L3MON4D3/LuaSnip', requires = { 'saadparwaiz1/cmp_luasnip' } }           -- Snippet Engine and Snippet Expansion
-  -- use 'navarasu/onedark.nvim'                                                      -- Theme inspired by Atom
+  use 'navarasu/onedark.nvim'                                                      -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim'                                                 -- Fancier statusline use 'lukas-reineke/indent-blankline.nvim'                                       -- Add indentation guides even on blank lines
   use 'lukas-reineke/indent-blankline.nvim'                                       -- Add indentation guides even on blank lines
   use 'tpope/vim-sleuth'                                                          -- Detect tabstop and shiftwidth automatically
@@ -42,10 +42,16 @@ require('packer').startup(function(use)
   use {'akinsho/bufferline.nvim', tag = "v2.*", requires = 'kyazdani42/nvim-web-devicons'}
   use { 'kyazdani42/nvim-tree.lua', requires = { 'kyazdani42/nvim-web-devicons' } }
 
+  -- Startup dashboard
   use 'goolord/alpha-nvim'
 
+  -- Folding
   use { 'anuvyklack/pretty-fold.nvim', requires = 'anuvyklack/nvim-keymap-amend' }
   use {'kevinhwang91/nvim-ufo', requires = 'kevinhwang91/promise-async'}
+
+ 
+  -- Use osc52 sequence copy so that it also works on ssh remotes
+  use {'ojroques/nvim-osc52'}
 
   if is_bootstrap then
     require('packer').sync()
@@ -103,10 +109,10 @@ vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
 
--- require('onedark').setup  {
---   transparent = true,
--- }
--- require('onedark').load()
+require('onedark').setup  {
+  transparent = true,
+}
+require('onedark').load()
 require('alpha').setup(require('alpha.themes.dashboard').config)
 
 -- Set completeopt to have a better completion experience
@@ -140,7 +146,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    -- theme = 'onedark',
+    theme = 'onedark',
     component_separators = '|',
     section_separators = '',
   },
@@ -320,14 +326,14 @@ local on_attach = function(_, bufnr)
 end
 
 -- nvim-cmp supports additional completion capabilities
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 capabilities.textDocument.foldingRange = {
   dynamicRegistration = false,
   lineFoldingOnly = true
 }
 
 -- Enable the following language servers
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'sumneko_lua' }
+local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'sumneko_lua', 'kotlin_language_server', 'jdtls' }
 
 -- Ensure the servers above are installed
 require('nvim-lsp-installer').setup {
@@ -432,3 +438,22 @@ require("nvim-tree").setup {
 vim.keymap.set('n', '<leader>op', require('nvim-tree').toggle, { desc = '[O]pen file [P]anel' })
 
 require("bufferline").setup()
+
+-- OSC52 clipboard config -- 
+local function copy(lines, _)
+  require('osc52').copy(table.concat(lines, '\n'))
+end
+local function paste()
+  return {vim.fn.split(vim.fn.getreg(''), '\n'), vim.fn.getregtype('')}
+end
+
+vim.g.clipboard = {
+  name = 'osc52',
+  copy = {['+'] = copy, ['*'] = copy},
+  paste = {['+'] = paste, ['*'] = paste},
+}
+
+-- Now the '+' register will copy to system clipboard using OSC52
+vim.keymap.set('n', '<leader>c', '"+y')
+vim.keymap.set('n', '<leader>cc', '"+yy')
+vim.lsp.set_log_level("debug")
